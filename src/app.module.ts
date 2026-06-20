@@ -4,9 +4,11 @@ import { AppService } from './app.service';
 import { PublicacionesModule } from './publicaciones/publicaciones.module';
 import { AutenticacionModule } from './autenticacion/autenticacion.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  imports: [PublicacionesModule, AutenticacionModule, UsuariosModule],
+  imports: [ConfigModule.forRoot(),MongooseModule.forRoot(process.env.MONGO_URI!),PublicacionesModule, AutenticacionModule, UsuariosModule],
   controllers: [AppController],
   providers: [AppService],
 })
