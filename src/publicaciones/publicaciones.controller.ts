@@ -1,4 +1,92 @@
-import { Controller } from '@nestjs/common';
+import {
+    Controller,
+    Post,
+    Get,
+    Delete,
+    Body,
+    Param,
+    Query,
+    UseGuards,
+    UseInterceptors,
+    UploadedFile,
+    HttpCode,
+    HttpStatus,
+    Req,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import type { Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
+import { PublicacionesService } from './publicaciones.service';
+import { CrearPublicacionDto } from './dto/crear-publicacion.dto';
+import { ListarPublicacionesDto } from './dto/listar-publicaciones.dto';
+import { AuthGuard } from 'src/autenticacion/guards/autenticacion.guard';
+import { UsuarioActual } from 'src/autenticacion/decoradores/usuario-actual.decorador';
 
 @Controller('publicaciones')
-export class PublicacionesController {}
+export class PublicacionesController {
+    constructor(private publicacionesService: PublicacionesService,
+        private jwtService: JwtService,
+    ) { }
+
+    // POST /publicaciones - crear una publicación
+    @Post()
+    @HttpCode(HttpStatus.CREATED)
+    @UseGuards(AuthGuard)
+    @UseInterceptors(FileInterceptor('imagen'))
+    crear(
+        @Body() dto: CrearPublicacionDto,
+        @UsuarioActual() usuario: any,
+        @UploadedFile() imagen?: { buffer: Buffer },
+    ) {
+        return this.publicacionesService.crear(dto, usuario.sub, imagen);
+    }
+
+    // GET /publicaciones - listar con orden, filtro y paginación
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  async listar(@Query() query: ListarPublicacionesDto, @Req() request: Request) {
+    const usuarioId = await this.extraerUsuarioIdSiExiste(request);
+    return this.publicacionesService.listar(query, usuarioId);
+  }
+
+  // DELETE /publicaciones/:id - baja lógica
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  eliminar(@Param('id') id: string, @UsuarioActual() usuario: any) {
+    return this.publicacionesService.eliminar(id, usuario);
+  }
+
+  // POST /publicaciones/:id/like - dar me gusta
+  @Post(':id/like')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(AuthGuard)
+  darLike(@Param('id') id: string, @UsuarioActual() usuario: any) {
+    return this.publicacionesService.darLike(id, usuario.sub);
+  }
+
+  // DELETE /publicaciones/:id/like - quitar me gusta
+  @Delete(':id/like')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  quitarLike(@Param('id') id: string, @UsuarioActual() usuario: any) {
+    return this.publicacionesService.quitarLike(id, usuario.sub);
+  }
+
+  private async extraerUsuarioIdSiExiste(request: Request): Promise<string | null> {
+    const authHeader = request.headers.authorization;
+    if (!authHeader) return null;
+
+    const [tipo, token] = authHeader.split(' ');
+    if (tipo !== 'Bearer' || !token) return null;
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token);
+      return payload.sub;
+    } catch {
+      return null; // token inválido o vencido: tratamos como "sin usuario"
+    }
+  }
+
+
+}

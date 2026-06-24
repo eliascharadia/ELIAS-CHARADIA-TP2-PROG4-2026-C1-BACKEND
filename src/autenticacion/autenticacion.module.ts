@@ -5,6 +5,7 @@ import { UsuariosModule } from '../usuarios/usuarios.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { AutenticacionController } from './autenticacion.controller';
 import { AutenticacionService } from './autenticacion.service';
+import { AuthGuard } from './guards/autenticacion.guard';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AutenticacionService } from './autenticacion.service';
     }),
   ],
   controllers: [AutenticacionController],
-  providers: [AutenticacionService]
+  providers: [AutenticacionService, AuthGuard],
+  exports: [JwtModule, AuthGuard]
 })
 export class AutenticacionModule {}
