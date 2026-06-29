@@ -9,11 +9,11 @@ import { PerfilUsuario } from '../usuarios/entities/usuario.schema';
 
 @Injectable()
 export class AutenticacionService {
-    constructor(
+  constructor(
     private usuariosService: UsuariosService,
     private cloudinaryService: CloudinaryService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async registrar(dto: RegisterDto, foto?: { buffer: Buffer }) {
     // 1. Verificar que las contraseñas coincidan
@@ -94,5 +94,43 @@ export class AutenticacionService {
       ? usuario.toObject()
       : usuario;
     return resto;
+  }
+
+  async autorizar(token: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(token);
+      const usuario = await this.usuariosService.buscarPorId(payload.sub);
+
+      if (!usuario) {
+        throw new UnauthorizedException('Usuario no encontrado');
+      }
+
+      return this.armarRespuestaUsuario(usuario);
+    } catch {
+      throw new UnauthorizedException('Token inválido o vencido');
+    }
+  }
+
+  async refrescar(token: string) {
+    let payload: any;
+
+    try {
+      payload = await this.jwtService.verifyAsync(token);
+    } catch {
+      throw new UnauthorizedException('Token inválido o vencido');
+    }
+
+    // Generamos un nuevo token con la misma payload (sin el "exp" viejo,
+    // que jwtService.sign() recalcula automáticamente según signOptions)
+    const nuevaPayload = {
+      sub: payload.sub,
+      correo: payload.correo,
+      nombreUsuario: payload.nombreUsuario,
+      perfil: payload.perfil,
+    };
+
+    const nuevoToken = this.jwtService.sign(nuevaPayload);
+
+    return { token: nuevoToken };
   }
 }

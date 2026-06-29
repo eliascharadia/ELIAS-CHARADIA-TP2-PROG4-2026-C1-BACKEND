@@ -1,4 +1,5 @@
-import { Controller, Post, Body, UseInterceptors, UploadedFile, HttpCode, HttpStatus } from '@nestjs/common';
+import { Req, Controller, Post, Body, UseInterceptors, UploadedFile, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import express from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AutenticacionService } from './autenticacion.service';
 import { RegisterDto } from './dto/register.dto';
@@ -19,5 +20,31 @@ export class AutenticacionController {
     @HttpCode(HttpStatus.OK)
     async login(@Body() loginDto: LoginDto) {
         return this.autenticacionService.login(loginDto);
+    }
+
+    @Post('autorizar')
+    @HttpCode(HttpStatus.OK)
+    async autorizar(@Req() request: express.Request) {
+        const token = this.extraerToken(request);
+        return this.autenticacionService.autorizar(token);
+    }
+
+    @Post('refrescar')
+    @HttpCode(HttpStatus.OK)
+    async refrescar(@Req() request: express.Request) {
+        const token = this.extraerToken(request);
+        return this.autenticacionService.refrescar(token);
+    }
+    
+
+    private extraerToken(request: express.Request): string {
+        const authHeader = request.headers.authorization;
+        const [tipo, token] = authHeader?.split(' ') ?? [];
+
+        if (tipo !== 'Bearer' || !token) {
+        throw new UnauthorizedException('Token no proporcionado');
+        }
+
+        return token;
     }
 }
