@@ -30,7 +30,7 @@ export class UsuariosController {
         return this.usuariosService.crearComoAdmin(dto);
     }
 
-    @Delete()
+    @Delete(':id')
     @HttpCode(HttpStatus.OK)
     desabilitar(@Param('id') id: string){
         return this.usuariosService.deshabilitar(id);
