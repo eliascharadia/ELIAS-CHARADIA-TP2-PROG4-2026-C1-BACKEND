@@ -218,4 +218,24 @@ export class PublicacionesService {
         return { mensaje: 'Me gusta eliminado correctamente' };
     }
 
+    async buscarPorId(id: string, usuarioId: string | null) {
+        const publicacion = await this.publicacionModel
+            .findOne({ _id: id, activa: true })
+            .populate('autor', 'nombre apellido nombreUsuario fotoPerfilUrl')
+            .lean();
+
+        if (!publicacion) {
+            throw new NotFoundException('La publicación no existe');
+        }
+
+        const conLikes = await this.agregarConteoLikes([publicacion]);
+
+        if (usuarioId) {
+            const marcadas = await this.marcarLikesDelUsuario(conLikes, usuarioId);
+            return marcadas[0];
+        }
+
+        return { ...conLikes[0], yaLeDiLike: false };
+    }
+
 }

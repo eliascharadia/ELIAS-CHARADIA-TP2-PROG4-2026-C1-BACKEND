@@ -49,6 +49,14 @@ export class PublicacionesController {
     return this.publicacionesService.listar(query, usuarioId);
   }
 
+  // GET /publicaciones:id - obtener una publicacion por id
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async buscarPorId(@Param('id') id: string, @Req() request: Request) {
+    const usuarioId = await this.extraerUsuarioIdSiExiste(request);
+    return this.publicacionesService.buscarPorId(id, usuarioId);
+  }
+
   // DELETE /publicaciones/:id - baja lógica
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
