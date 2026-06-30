@@ -55,7 +55,13 @@ export class AutenticacionService {
       perfil: PerfilUsuario.USUARIO, // por defecto siempre "usuario"
     });
 
-    return this.armarRespuestaUsuario(nuevoUsuario);
+    // 6. Generar el token, igual que en login
+    const token = this.generarToken(nuevoUsuario);
+
+    return {
+      token,
+      usuario: this.armarRespuestaUsuario(nuevoUsuario),
+    };
   }
 
   async login(dto: LoginDto) {
@@ -74,18 +80,23 @@ export class AutenticacionService {
     }
 
     // 3. Generar el token
+    const token = this.generarToken(usuario);
+
+    return {
+      token,
+      usuario: this.armarRespuestaUsuario(usuario),
+    };
+  }
+
+  // Método privado reutilizable, evita repetir el armado del payload
+  private generarToken(usuario: any): string {
     const payload = {
       sub: usuario._id,
       correo: usuario.correo,
       nombreUsuario: usuario.nombreUsuario,
       perfil: usuario.perfil,
     };
-    const token = this.jwtService.sign(payload);
-
-    return {
-      token,
-      usuario: this.armarRespuestaUsuario(usuario),
-    };
+    return this.jwtService.sign(payload);
   }
 
   private armarRespuestaUsuario(usuario: any) {
