@@ -25,4 +25,8 @@ export class UsuariosService {
       $or: [{ correo }, { nombreUsuario }],
     });
   }
+
+  async buscarPorId(id: string): Promise<UsuarioDocument | null> {
+    return this.usuarioModel.findById(id);
+  }
 }
