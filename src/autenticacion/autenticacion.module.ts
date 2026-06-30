@@ -6,6 +6,7 @@ import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { AutenticacionController } from './autenticacion.controller';
 import { AutenticacionService } from './autenticacion.service';
 import { AuthGuard } from './guards/autenticacion.guard';
+import { AdminGuard } from './guards/admin.guard';
 
 @Module({
   imports: [
@@ -16,12 +17,12 @@ import { AuthGuard } from './guards/autenticacion.guard';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '20s' },
+        signOptions: { expiresIn: '15m' },
       }),
     }),
   ],
   controllers: [AutenticacionController],
-  providers: [AutenticacionService, AuthGuard],
-  exports: [JwtModule, AuthGuard]
+  providers: [AutenticacionService, AuthGuard, AdminGuard],
+  exports: [JwtModule, AuthGuard, AdminGuard]
 })
 export class AutenticacionModule {}
