@@ -1,4 +1,4 @@
-import { Injectable, ConflictException  } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException  } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Usuario, UsuarioDocument, PerfilUsuario  } from './entities/usuario.schema';
 import { Model } from 'mongoose';
@@ -39,6 +39,10 @@ export class UsuariosService {
   }
 
   async crearComoAdmin(dto: CrearUsuarioAdminDto): Promise<UsuarioDocument> {
+    if (dto.password !== dto.repetirPassword) {
+      throw new BadRequestException('Las contraseñas no coinciden');
+    }
+
     const existente = await this.existeCorreoOUsuario(dto.correo, dto.nombreUsuario);
     if (existente) {
       throw new ConflictException('El correo o el nombre de usuario ya están en uso');
