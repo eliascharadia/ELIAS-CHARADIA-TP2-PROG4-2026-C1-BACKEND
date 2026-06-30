@@ -31,6 +31,10 @@ export class CrearUsuarioAdminDto {
   })
   password: string;
 
+  @IsString()
+  @IsNotEmpty({ message: 'Debés repetir la contraseña' })
+  repetirPassword: string;
+
   @IsDateString({}, { message: 'La fecha de nacimiento no es válida' })
   fechaNacimiento: string;
 
