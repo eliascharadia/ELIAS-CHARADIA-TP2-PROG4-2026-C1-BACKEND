@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsuariosModule } from '../usuarios/usuarios.module';
@@ -10,7 +10,7 @@ import { AdminGuard } from './guards/admin.guard';
 
 @Module({
   imports: [
-    UsuariosModule,
+    forwardRef(() => UsuariosModule),
     CloudinaryModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
