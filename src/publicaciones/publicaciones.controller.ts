@@ -3,6 +3,7 @@ import {
     Post,
     Get,
     Delete,
+    Put,
     Body,
     Param,
     Query,
@@ -21,6 +22,8 @@ import { CrearPublicacionDto } from './dto/crear-publicacion.dto';
 import { ListarPublicacionesDto } from './dto/listar-publicaciones.dto';
 import { AuthGuard } from 'src/autenticacion/guards/autenticacion.guard';
 import { UsuarioActual } from 'src/autenticacion/decoradores/usuario-actual.decorador';
+import { CreateComentarioDto } from './dto/create-comentario.dto';
+import { ListarComentariosDto } from './dto/listar-comentarios.dto';
 
 @Controller('publicaciones')
 export class PublicacionesController {
@@ -96,5 +99,38 @@ export class PublicacionesController {
     }
   }
 
+  // ################## COMENTARIOS #############################
+  // POST /publicaciones/:publicacionId/comentarios
+    @Post('/:publicacionId/comentarios')
+    @HttpCode(HttpStatus.CREATED)
+    @UseGuards(AuthGuard)
+    crearComentario(
+      @Param('publicacionId') publicacionId: string,
+      @Body() dto: CreateComentarioDto,
+      @UsuarioActual() usuario: any,
+    ) {
+      return this.publicacionesService.crearComentario(publicacionId, dto, usuario.sub);
+    }
 
+    // GET /publicaciones/:publicacionId/comentarios
+      @Get('/:publicacionId/comentarios')
+      @HttpCode(HttpStatus.OK)
+      listarComentarios(
+        @Param('publicacionId') publicacionId: string,
+        @Query() query: ListarComentariosDto,
+      ) {
+        return this.publicacionesService.listarComentarios(publicacionId, query);
+      }
+
+    // PUT /publicaciones/:publicacionId/comentarios/:comentarioId
+      @Put('/:publicacionId/comentarios/:comentarioId')
+      @HttpCode(HttpStatus.OK)
+      @UseGuards(AuthGuard)
+      editar(
+        @Param('comentarioId') comentarioId: string,
+        @Body() dto: CreateComentarioDto,
+        @UsuarioActual() usuario: any,
+      ) {
+        return this.publicacionesService.editar(comentarioId, dto, usuario.sub);
+      }
 }

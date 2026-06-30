@@ -6,10 +6,10 @@ import { AutenticacionModule } from './autenticacion/autenticacion.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ComentariosModule } from './comentarios/comentarios.module';
+
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }),MongooseModule.forRoot(process.env.MONGO_URI!),PublicacionesModule, AutenticacionModule, UsuariosModule, ComentariosModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }),MongooseModule.forRoot(process.env.MONGO_URI!),PublicacionesModule, AutenticacionModule, UsuariosModule],
   controllers: [AppController],
   providers: [AppService],
 })
