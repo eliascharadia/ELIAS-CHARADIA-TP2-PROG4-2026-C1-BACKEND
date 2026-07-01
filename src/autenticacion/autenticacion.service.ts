@@ -73,6 +73,10 @@ export class AutenticacionService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    if (!usuario.habilitado) {
+      throw new UnauthorizedException('Tu cuenta fue deshabilitada. Contactá a un administrador.');
+    }
+    
     // 2. Comparar la contraseña recibida con la encriptada guardada
     const passwordValida = await bcrypt.compare(dto.password, usuario.password);
     if (!passwordValida) {
